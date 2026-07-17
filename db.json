@@ -1,0 +1,22 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "email": "juan@gmail.com",
+      "password": "A123456",
+      "role": "user"
+    },
+    {
+      "id": "2",
+      "email": "empresa@greenloop.com",
+      "password": "empresa123",
+      "role": "company"
+    },
+    {
+      "id": "3",
+      "email": "admin@greenloop.com",
+      "password": "admin123",
+      "role": "admin"
+    }
+  ]
+}

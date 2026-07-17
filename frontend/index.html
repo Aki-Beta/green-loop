@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Green Loop - SPA</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Fondo decorativo difuminado -->
+    <div class="background-decor">
+        <div class="circle circle-1"></div>
+        <div class="circle circle-2"></div>
+    </div>
+
+    <!-- PANTALLA 1: Vista de Autenticación (Login) -->
+    <main id="login-screen" class="login-container">
+        <header class="brand-header">
+            <div class="brand-logo-container">
+                <svg class="brand-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M7 17C4.23858 17 2 14.7614 2 12C2 9.23858 4.23858 7 7 7C9.11718 7 10.9238 8.30906 11.6441 10.134M17 7C19.7614 7 22 9.23858 22 12C22 14.7614 19.7614 17 17 17C14.8828 17 13.0762 15.6909 12.3559 13.866M11.6441 10.134C11.8741 10.7186 12 11.3446 12 12C12 12.6554 11.8741 13.2814 11.6441 13.866M11.6441 10.134C11.2332 11.178 11.2332 12.822 11.6441 13.866" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <h1 class="brand-title">Green Loop</h1>
+            <p class="brand-subtitle">Plataforma de Reciclaje Inteligente</p>
+        </header>
+
+        <section class="role-selection-area">
+            <h2 class="section-title">¿Cómo deseas ingresar?</h2>
+            <div class="role-cards-grid">
+                <button type="button" data-role="user" class="role-card">
+                    <div class="role-icon">🌱</div>
+                    <span class="role-label">Usuarios</span>
+                </button>
+                <button type="button" data-role="company" class="role-card">
+                    <div class="role-icon">🏢</div>
+                    <span class="role-label">Empresas</span>
+                </button>
+                <button type="button" data-role="admin" class="role-card">
+                    <div class="role-icon">⚙️</div>
+                    <span class="role-label">Admin</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Mensaje de Error de Validación Dinámico -->
+        <div id="error-message" class="error-banner style-hidden"></div>
+
+        <form id="login-form" class="login-form" novalidate>
+            <div class="form-group">
+                <label for="email" class="form-label">Correo electrónico</label>
+                <div class="input-wrapper">
+                    <span class="input-icon"></span>
+                    <input type="email" id="email" class="form-input" placeholder="ejemplo@greenloop.com" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">Contraseña</label>
+                <div class="input-wrapper">
+                    <span class="input-icon"></span>
+                    <input type="password" id="password" class="form-input" placeholder="Mínimo 6 caracteres" required>
+                </div>
+            </div>
+
+            <button type="submit" id="btn-submit" class="submit-button">
+                Ingresar como <span id="submit-role-text">Usuarios</span>
+            </button>
+
+            <div class="form-footer">
+                <a href="#" class="footer-link">Olvidé mi contraseña</a>
+            </div>
+        </form>
+    </main>
+
+<!--PANTALLA 3: REGISTRO-->
+<main id="register-screen" class="login-container style-hidden">
+    <header class="brand-header">
+        <h1 class="brand-title">Crear Cuenta</h1>
+        <p class="brand-subtitle">Ûnete a Green Loop</p>
+    </header>
+
+
+    <div id="register-error-message" class="error-banner style-hidden"></div>
+
+    <form id="register-form" class="login-form" novalidate>
+        <div class="form-group">
+            <label for="register-email" class="form-label">Correo electrónico</label>
+            <div class="input-wrapper">
+                <input type="email" id="register-email" class="form-input" placeholder="ejemplo@correo.com" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="register-password" class="form-label">Contraseña</label>
+            <div class="input-wrapper">
+                <input type="password" id="register-password" class="form-input" placeholder="Mínimo 6 caracteres" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="register-role" class="form-label">Tipo de cuenta</label>
+            <select id="register-role" class="form-input" required>
+                <option value="user">Usuario</option>
+                <option value="company">Empresa</option>
+            </select>
+        </div>
+
+        <button type="submit" id="btn-register-submit" class="submit-button">
+            Crear cuenta
+        </button>
+
+        <div class="form-footer">
+            <a href="#" id="link-to-login" class="footer-link highlighted">Ya tengo cuenta, ingresar</a>
+        </div>
+    </form>
+</main>
+
+</main>
+    <!-- PANTALLA 2: Dashboard SPA (Oculto antes del Login) -->
+    <main id="dashboard-screen" class="login-container style-hidden">
+        <header class="brand-header">
+            <h1 class="brand-title">¡Bienvenido a Green Loop!</h1>
+            <p id="user-display-info" class="brand-subtitle">Cargando sesión...</p>
+        </header>
+        <section class="dashboard-content">
+            <p>hola señor usuario</p>
+            <button id="btn-logout" class="submit-button logout-theme">Cerrar Sesión</button>
+        </section>
+    </main>
+
+    <script src="js/app.js" defer></script>
+</body>
+</html>
