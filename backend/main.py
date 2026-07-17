@@ -1,21 +1,29 @@
-from flask import Flask, request, jsonify
-from flask_sqlalchemy import SQLAlchemy
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, get_jwt
-from werkzeug.security import generate_password_hash, check_password_hash
-from functools import wraps
 import os
+from functools import wraps
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = 'cambia-esto-en-produccion'
-app.config['JWT_SECRET_KEY'] = 'otra-clave-secreta-distinta'
-app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(os.path.dirname(__file__), 'greenloop.db')}"
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+from dotenv import load_dotenv
+from flask import Blueprint, Flask, jsonify, request
+from flask_jwt_extended import (
+    JWTManager,
+    create_access_token,
+    get_jwt,
+    get_jwt_identity,
+    jwt_required,
+    verify_jwt_in_request,
+)
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import check_password_hash, generate_password_hash
 
-db = SQLAlchemy(app)
-jwt = JWTManager(app)
+load_dotenv()
+
+db = SQLAlchemy()
+jwt = JWTManager()
+
+# Blueprint for API routes
+api_bp = Blueprint('api', __name__, url_prefix='/api')
 
 
-class User(db.Model):
+class User(db.Model):  # type: ignore[name-defined]
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -52,15 +60,12 @@ def role_required(*allowed_roles):
     return decorator
 
 
-from flask_jwt_extended import verify_jwt_in_request
-
-
-@app.route("/api/health", methods=["GET"])
+@api_bp.route("/health", methods=["GET"])
 def health():
     return jsonify({"status": "ok", "service": "Green Loop API"}), 200
 
 
-@app.route("/api/auth/register", methods=["POST"])
+@api_bp.route("/auth/register", methods=["POST"])
 @jwt_required()
 @role_required("admin")
 def admin_register():
@@ -88,7 +93,7 @@ def admin_register():
     return jsonify(user.to_dict()), 201
 
 
-@app.route("/api/auth/register-company", methods=["POST"])
+@api_bp.route("/auth/register-company", methods=["POST"])
 def company_register():
     """Empresas se registran libremente (rol 'company')"""
     data = request.get_json() or {}
@@ -110,7 +115,7 @@ def company_register():
     return jsonify(user.to_dict()), 201
 
 
-@app.route("/api/auth/login", methods=["POST"])
+@api_bp.route("/auth/login", methods=["POST"])
 def login():
     data = request.get_json() or {}
     email = data.get("email")
@@ -129,7 +134,7 @@ def login():
     return jsonify({"access_token": token, "user": user.to_dict()}), 200
 
 
-@app.route("/api/users", methods=["GET"])
+@api_bp.route("/users", methods=["GET"])
 @jwt_required()
 @role_required("admin")
 def list_users():
@@ -137,7 +142,7 @@ def list_users():
     return jsonify([u.to_dict() for u in users]), 200
 
 
-@app.route("/api/users/<int:user_id>", methods=["DELETE"])
+@api_bp.route("/users/<int:user_id>", methods=["DELETE"])
 @jwt_required()
 @role_required("admin")
 def delete_user(user_id):
@@ -147,7 +152,7 @@ def delete_user(user_id):
     return jsonify({"msg": "Usuario eliminado"}), 200
 
 
-@app.route("/api/me", methods=["GET"])
+@api_bp.route("/me", methods=["GET"])
 @jwt_required()
 def me():
     user_id = get_jwt_identity()
@@ -157,7 +162,33 @@ def me():
     return jsonify(user.to_dict()), 200
 
 
-if __name__ == "__main__":
+def create_app(config_overrides=None):
+    """Application factory."""
+    app = Flask(__name__)
+    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-change-in-production')
+    app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'dev-jwt-secret-change-in-production')
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
+        'DATABASE_URL',
+        f"sqlite:///{os.path.join(os.path.dirname(__file__), 'greenloop.db')}"
+    )
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+    if config_overrides:
+        app.config.update(config_overrides)
+
+    db.init_app(app)
+    jwt.init_app(app)
+    app.register_blueprint(api_bp)
+
     with app.app_context():
         db.create_all()
+
+    return app
+
+
+# Default app instance for production
+app = create_app()
+
+
+if __name__ == "__main__":
     app.run(debug=True, port=5000)
