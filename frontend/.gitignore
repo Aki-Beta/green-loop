@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+venv/
+.env
+*.sqlite
+*.db
+backend/certificados/
+backend/temp/
+.vscode/
+.idea/
+.DS_Store
+*.log
+node_modules/
+dist/
+build/

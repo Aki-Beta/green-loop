@@ -1,0 +1,29 @@
+/* frontend/css/style.css - Estilos personalizados sobre Tailwind */
+
+@keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.animate-slide-in { animation: slideInRight 0.3s ease-out; }
+.toast { animation: slideInRight 0.3s ease-out; box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
+.toast.hiding { animation: fadeIn 0.3s ease-in reverse forwards; }
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #22c55e;
+    border-color: #22c55e;
+}
+
+table th { position: sticky; top: 0; background-color: #f9fafb; z-index: 10; }
+
+#status-dot.online  { background-color: #22c55e; }
+#status-dot.offline { background-color: #ef4444; }
+
+@media print {
+    nav, footer, #toast-container { display: none !important; }
+    main { padding: 0 !important; max-width: 100% !important; }
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: #86efac; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #4ade80; }

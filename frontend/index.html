@@ -3,166 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Green Loop - SPA</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <title>EcoTrazabilidad - Gestión de Residuos Sólidos</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50:'#f0fdf4',100:'#dcfce7',200:'#bbf7d0',300:'#86efac',400:'#4ade80',
+                            500:'#22c55e',600:'#16a34a',700:'#15803d',800:'#166534',900:'#14532d'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
 </head>
-<body>
-    <!-- Fondo decorativo difuminado -->
-    <div class="background-decor">
-        <div class="circle circle-1"></div>
-        <div class="circle circle-2"></div>
-    </div>
+<body class="bg-gray-50 min-h-screen flex flex-col">
 
-    <!-- PANTALLA 1: Vista de Autenticación (Login) -->
-    <main id="login-screen" class="login-container">
-        <header class="brand-header">
-            <div class="brand-logo-container">
-                <svg class="brand-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M7 17C4.23858 17 2 14.7614 2 12C2 9.23858 4.23858 7 7 7C9.11718 7 10.9238 8.30906 11.6441 10.134M17 7C19.7614 7 22 9.23858 22 12C22 14.7614 19.7614 17 17 17C14.8828 17 13.0762 15.6909 12.3559 13.866M11.6441 10.134C11.8741 10.7186 12 11.3446 12 12C12 12.6554 11.8741 13.2814 11.6441 13.866M11.6441 10.134C11.2332 11.178 11.2332 12.822 11.6441 13.866" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </div>
-            <h1 class="brand-title">Green Loop</h1>
-            <p class="brand-subtitle">Plataforma de Reciclaje Inteligente</p>
-        </header>
-
-        <section class="role-selection-area">
-            <h2 class="section-title">¿Cómo deseas ingresar?</h2>
-            <div class="role-cards-grid">
-                <button type="button" data-role="user" class="role-card">
-                    <div class="role-icon">🌱</div>
-                    <span class="role-label">Usuarios</span>
-                </button>
-                <button type="button" data-role="company" class="role-card">
-                    <div class="role-icon">🏢</div>
-                    <span class="role-label">Empresas</span>
-                </button>
-                <button type="button" data-role="admin" class="role-card">
-                    <div class="role-icon">⚙️</div>
-                    <span class="role-label">Admin</span>
-                </button>
-            </div>
-        </section>
-
-        <!-- Mensaje de Error de Validación Dinámico -->
-        <div id="error-message" class="error-banner style-hidden"></div>
-
-        <form id="login-form" class="login-form" novalidate>
-            <div class="form-group">
-                <label for="email" class="form-label">Correo electrónico</label>
-                <div class="input-wrapper">
-                    <span class="input-icon"></span>
-                    <input type="email" id="email" class="form-input" placeholder="ejemplo@greenloop.com" required>
+    <nav class="bg-primary-700 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <i class="fas fa-recycle text-2xl mr-2"></i>
+                    <span class="font-bold text-xl">EcoTrazabilidad</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="#/" class="hover:text-primary-100 transition" data-link>
+                        <i class="fas fa-tachometer-alt mr-1"></i> Dashboard
+                    </a>
+                    <a href="#/carga" class="hover:text-primary-100 transition" data-link>
+                        <i class="fas fa-qrcode mr-1"></i> Registrar Carga
+                    </a>
+                    <a href="#/reportes" class="hover:text-primary-100 transition" data-link>
+                        <i class="fas fa-chart-bar mr-1"></i> Reportes
+                    </a>
+                </div>
+                <div class="flex items-center">
+                    <span class="flex items-center text-sm mr-3">
+                        <span class="w-2 h-2 rounded-full bg-yellow-400 mr-1" id="status-dot"></span>
+                        <span id="status-text">Conectando...</span>
+                    </span>
                 </div>
             </div>
+        </div>
+    </nav>
 
-            <div class="form-group">
-                <label for="password" class="form-label">Contraseña</label>
-                <div class="input-wrapper">
-                    <span class="input-icon"></span>
-                    <input type="password" id="password" class="form-input" placeholder="Mínimo 6 caracteres" required>
-                </div>
-            </div>
-
-            <button type="submit" id="btn-submit" class="submit-button">
-                Ingresar como <span id="submit-role-text">Usuarios</span>
-            </button>
-
-            <div class="form-footer">
-                <a href="#" class="footer-link">Olvidé mi contraseña</a>
-            </div>
-        </form>
+    <main id="app" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="flex justify-center items-center h-64">
+            <div class="animate-spin rounded-full h-12 w-12 border-4 border-primary-500 border-t-transparent"></div>
+        </div>
     </main>
 
-<!--PANTALLA 3: REGISTRO-->
-<main id="register-screen" class="login-container style-hidden">
-    <header class="brand-header">
-        <h1 class="brand-title">Crear Cuenta</h1>
-        <p class="brand-subtitle">Ûnete a Green Loop</p>
-    </header>
-
-
-    <div id="register-error-message" class="error-banner style-hidden"></div>
-
-    <form id="register-form" class="login-form" novalidate>
-        <div class="form-group">
-            <label for="register-email" class="form-label">Correo electrónico</label>
-            <div class="input-wrapper">
-                <input type="email" id="register-email" class="form-input" placeholder="ejemplo@correo.com" required>
-            </div>
+    <footer class="bg-gray-800 text-gray-400 py-6 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p>Sistema de Trazabilidad de Residuos Sólidos - Resolución 2184/2019 - Ley 1950/2019</p>
         </div>
+    </footer>
 
-        <div class="form-group">
-            <label for="register-password" class="form-label">Contraseña</label>
-            <div class="input-wrapper">
-                <input type="password" id="register-password" class="form-input" placeholder="Mínimo 6 caracteres" required>
-            </div>
-        </div>
+    <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
 
-        <div class="form-group">
-            <label for="register-role" class="form-label">Tipo de cuenta</label>
-            <select id="register-role" class="form-input" required>
-                <option value="user">Usuario</option>
-                <option value="company">Empresa</option>
-            </select>
-        </div>
-
-        <button type="submit" id="btn-register-submit" class="submit-button">
-            Crear cuenta
-        </button>
-
-        <div class="form-footer">
-            <a href="#" id="link-to-login" class="footer-link highlighted">Ya tengo cuenta, ingresar</a>
-        </div>
-    </form>
-</main>
-
-</main>
-    <!-- PANTALLA 2: Dashboard SPA (Oculto antes del Login) -->
-    <main id="dashboard-screen" class="login-container style-hidden">
-        <header class="brand-header">
-            <h1 class="brand-title">¡Bienvenido a Green Loop!</h1>
-            <p id="user-display-info" class="brand-subtitle">Cargando sesión...</p>
-        </header>
-        <section class="dashboard-content">
-            <p id="dashboard-welcome-text">hola señor usuario</p>
-
-            <!-- Solo visible si el usuario logueado es admin -->
-            <section class="dashboard-content">
-    <p id="dashboard-welcome-text">hola señor usuario</p>
-
-    <!-- Solo visible si el usuario logueado es admin -->
-    <div id="admin-panel" class="style-hidden">
-        <h3 style="margin-top:20px; margin-bottom:10px;">Crear nuevo usuario</h3>
-
-        <div id="register-error-message" class="error-banner style-hidden"></div>
-
-        <form id="register-form" class="login-form" novalidate>
-            <div class="form-group">
-                <label for="register-email" class="form-label">Correo electrónico</label>
-                <input type="email" id="register-email" class="form-input" placeholder="ejemplo@correo.com" required>
-            </div>
-            <div class="form-group">
-                <label for="register-password" class="form-label">Contraseña</label>
-                <input type="password" id="register-password" class="form-input" placeholder="Mínimo 6 caracteres" required>
-            </div>
-            <div class="form-group">
-                <label for="register-role" class="form-label">Tipo de cuenta</label>
-                <select id="register-role" class="form-input" required>
-                    <option value="user">Usuario</option>
-                    <option value="company">Empresa</option>
-                    <option value="admin">Admin</option>
-                </select>
-            </div>
-            <button type="submit" id="btn-register-submit" class="submit-button">
-                Crear usuario
-            </button>
-        </form>
-    </div>
-    
-            <button id="btn-logout" class="submit-button logout-theme">Cerrar Sesión</button>
-        </section>
-    </main>
-
-    <script src="js/app.js" defer></script>
+    <!-- IMPORTANTE: orden de carga (helpers y api primero, luego router, luego vistas, luego app.js al final) -->
+    <script src="js/utils/helpers.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/router.js"></script>
+    <script src="js/views/dashboard.js"></script>
+    <script src="js/views/carga.js"></script>
+    <script src="js/views/certificado.js"></script>
+    <script src="js/views/reportes.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>
