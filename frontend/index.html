@@ -124,7 +124,41 @@
             <p id="user-display-info" class="brand-subtitle">Cargando sesión...</p>
         </header>
         <section class="dashboard-content">
-            <p>hola señor usuario</p>
+            <p id="dashboard-welcome-text">hola señor usuario</p>
+
+            <!-- Solo visible si el usuario logueado es admin -->
+            <section class="dashboard-content">
+    <p id="dashboard-welcome-text">hola señor usuario</p>
+
+    <!-- Solo visible si el usuario logueado es admin -->
+    <div id="admin-panel" class="style-hidden">
+        <h3 style="margin-top:20px; margin-bottom:10px;">Crear nuevo usuario</h3>
+
+        <div id="register-error-message" class="error-banner style-hidden"></div>
+
+        <form id="register-form" class="login-form" novalidate>
+            <div class="form-group">
+                <label for="register-email" class="form-label">Correo electrónico</label>
+                <input type="email" id="register-email" class="form-input" placeholder="ejemplo@correo.com" required>
+            </div>
+            <div class="form-group">
+                <label for="register-password" class="form-label">Contraseña</label>
+                <input type="password" id="register-password" class="form-input" placeholder="Mínimo 6 caracteres" required>
+            </div>
+            <div class="form-group">
+                <label for="register-role" class="form-label">Tipo de cuenta</label>
+                <select id="register-role" class="form-input" required>
+                    <option value="user">Usuario</option>
+                    <option value="company">Empresa</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <button type="submit" id="btn-register-submit" class="submit-button">
+                Crear usuario
+            </button>
+        </form>
+    </div>
+    
             <button id="btn-logout" class="submit-button logout-theme">Cerrar Sesión</button>
         </section>
     </main>
