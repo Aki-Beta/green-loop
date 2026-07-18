@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Green-Loop - Trazabilidad de Residuos Sólidos</title>
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link href="css/style.css?v=20240718" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+
+    <!-- NAVBAR -->
+    <nav id="navbar" class="navbar hidden">
+        <div class="navbar-inner">
+            <div class="navbar-content">
+                <div class="navbar-brand">
+                    <span class="icon leaf" style="width: 2rem; height: 2rem;"></span>
+                    <span class="font-bold text-xl">Green-Loop</span>
+                </div>
+                <div class="nav-links" id="nav-links"></div>
+                <div class="user-menu" id="user-menu"></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main id="app" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Loading initial -->
+        <div class="flex justify-center items-center h-64">
+            <div class="spinner"></div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-inner">
+            <p>Green-Loop - Trazabilidad de Residuos Sólidos | Resolución 2184/2019 - Ley 1950/2019</p>
+        </div>
+    </footer>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toast-container"></div>
+
+    <!-- SCRIPTS - Orden importante -->
+    <script src="assets/js/icons.js?v=20240718"></script>
+    <script src="js/api.js?v=20240718"></script>
+    <script src="js/router.js?v=20240718"></script>
+    <script src="js/views/login.js?v=20240718"></script>
+    <script src="js/views/register.js?v=20240718"></script>
+    <script src="js/views/dashboard.js?v=20240718"></script>
+    <script src="js/views/cargas.js?v=20240718"></script>
+    <script src="js/views/certificados.js?v=20240718"></script>
+    <script src="js/views/reportes.js?v=20240718"></script>
+    <script src="js/views/usuarios.js?v=20240718"></script>
+    <script src="js/app.js?v=20240718"></script>
+</body>
+</html>
