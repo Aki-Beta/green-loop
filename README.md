@@ -1,244 +1,169 @@
-# Green-Loop ♻️
+#  Green-Loop
 
-**Plataforma de Trazabilidad de Residuos Sólidos - Colombia**
+Web platform of traceability and compliance for solid waste management, aimed at recycler cooperatives and grooming companies. Digitize the complete collection cycle: registration of loads by QR, automatic calculation of incentives and issuance of digital environmental management certificates, with reports ready to be presented to authorities.
 
-Implementación de la Resolución 2184/2019 y Ley 1950/2019 para gestión de residuos con trazabilidad, incentivos a recicladores y certificados de cumplimiento.
+## Roles
 
----
+| Role | What does |
 
-## 🚀 Inicio Rápido (Una sola línea)
+|---|---|
+
+| **Admin** | Manage users, routes, trucks/QR, requests, certificates, payments and reports |
+
+| **Recycler** | Register loads by scanning the truck's QR (or manual input if the navigator does not support camera) |
+
+| **Company** | Request collections and consult your environmental certificates |
+
+## Main functionalities
+
+- Registration of loads by QR, associated with a real truck and route.
+
+- Calculation of incentives by weight, quality of the waste and area (backend; no dedicated view yet in the frontend).
+
+- Digital certification with single file and verification hash. **The verification of a certificate is public**, no login required.
+
+- Collection requests (`pending → attended/cancelled`).
+
+- Reports by area/month and format for authorities, exportable to CSV.
+
+- Loads, trucks and certificates are **immutable once created** (not edited or deleted), by design, to ensure traceability.
+
+## Stack
+
+- **Backend**: FastAPI + SQLAlchemy + PostgreSQL 16, JWT authentication with bcrypt.
+
+- **Frontend**: JavaScript vanilla (SPA by hash routing) + Tailwind CSS, served with Nginx.
+
+- **Infrastructure**: Docker Compose (3 services: `postgres`, `backend`, `frontend`).
+
+## Prerequisites
+
+- Docker and Docker Compose installed.
+
+## Installation and execution
 
 ```bash
-# 1. Clonar
-git clone <repo> Green_Loop && cd Green_Loop
 
-# 2. Levantar todo con Docker
-docker compose up -d --build
+Git clone <url-del-repo>
 
-# 3. Abrir en navegador
-# http://localhost:3000
-```
+Cd green-loop
 
----
-
-## 🌐 URLs Importantes
-
-| Qué | URL |
-|-----|-----|
-| **App (Login)** | http://localhost:3000 |
-| **API Docs (Swagger)** | http://localhost:8000/docs |
-| **Health Check** | http://localhost:3000/health |
-
----
-
-## 👤 Usuarios de Prueba
-
-| Rol | Email | Contraseña | Qué ve |
-|-----|-------|------------|--------|
-| **Admin** | `admin@greenloop.co` | `admin123` | Todo: Dashboard, Cargas, Certificados, Reportes, Usuarios |
-| **Reciclador** | `juan@reciclador.co` | `rec123` | Dashboard, Mis Cargas, Mis Pagos |
-| **Empresa** | `empresa@test.com` | `empresa123` | Dashboard, Mis Certificados, Cargas (solo ver) |
-
-> **Nota:** El usuario `bdeoro200@gmail.com` no tiene contraseña configurada.
-
----
-
-## 🛠️ Desarrollo Local (Sin Docker)
-
-### Backend (FastAPI + PostgreSQL)
-```bash
-cd Green_Loop/backend
-python -m venv venv
-source venv/bin/activate          # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-cp .env.example .env              # Editar DATABASE_URL si usas PostgreSQL local
-python main.py
-# → http://localhost:8000/docs
-```
-
-### Frontend (Vanilla JS + CSS)
-```bash
-cd Green_Loop/frontend
-npx serve .                       # O: python -m http.server 3000
-# → http://localhost:3000
-```
-
-### Base de Datos
-```bash
-# Opción A: Usar PostgreSQL local
-createdb greenloop
-psql -d greenloop -f ../database/schema.sql
-
-# Opción B: Solo Docker para la BD
-docker run -d --name pg -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=greenloop -p 5432:5432 postgres:16
-```
-
----
-
-## 📁 Estructura del Proyecto
+Docker compose up -d --build
 
 ```
+
+This lifts the three services. Database tables are created automatically when the backend starts (`init_db()`); `schema.sql` is left as a query reference.
+
+## Environment variables
+
+Defined directly in `docker-compose.yml`:
+
+| Variable | Description |
+
+|---|---|
+
+| `DATABASE_URL` | Connection to PostgreSQL (`postgres:5432/greenloop`) |
+
+| `SECRET_KEY` | JWT signature key — **change in production** |
+
+| `ALGORITHM` | JWT Algorithm (`HS256`) |
+
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | Token expiration (60 min) |
+
+| `FRONTEND_URL` | Frontend URL, used by the backend (`http://localhost:3000`) |
+
+## 📁 Project Structure
+
+```
+
 Green_Loop/
-├── backend/                 # FastAPI
-│   ├── api/
-│   │   ├── routes.py        # 9 routers: auth, cargas, certificados, pagos, catalogos, reportes, dashboard, usuarios, health
-│   │   └── auth.py          # JWT + bcrypt
-│   ├── models/              # SQLAlchemy modelos
-│   ├── schemas/             # Pydantic validación
-│   ├── services/            # Lógica: pdf, pagos, qr, hash
-│   ├── db/                  # Conexión BD
-│   ├── main.py              # App FastAPI
-│   ├── requirements.txt
-│   └── Dockerfile
-├── frontend/                # Vanilla JS + CSS + Chart.js
-│   ├── index.html
-│   ├── css/style.css        # CSS puro (sin Tailwind, sin CDN)
-│   ├── js/
-│   │   ├── api.js           # Fetch + auth
-│   │   ├── router.js        # SPA hash router
-│   │   ├── app.js           # Init + navbar
-│   │   └── views/           # login, register, dashboard, cargas, certificados, reportes, usuarios
-│   └── assets/              # FontAwesome, Chart.js, favicon (locales)
+
+├── backend/ # FastAPI
+
+│ ├── api/
+
+│ │ ├── routes.py # 9 routers: auth, loads, certificates, payments, catalogs, reports, dashboard, users, health
+
+│ │ └── auth.py # JWT + bcrypt
+
+│ ├── models/ # SQLAlchemy models
+
+│ ├── schemas/ # Pydantic validation
+
+│ ├── services/ # Logic: pdf, payments, qr, hash
+
+│ ├── db/ # BD Connection
+
+│ ├── main.py # FastAPI App
+
+│├── requirements.txt
+
+│ └�─ Dockerfile
+
+├── frontend/ # Vanilla JS + CSS + Chart.js
+
+│├── index.html
+
+│ ├── css/style.css # pure CSS (without Tailwind, without CDN)
+
+│ ├── js/
+
+│ │ ├── api.js # Fetch + auth
+
+│ │ ├── router.js # SPA hash router
+
+│ │ ├── app.js # Init + navbar
+
+│ │ └── views/ # login, register, dashboard, loads, certificates, reports, users
+
+│ └── assets/ # FontAwesome, Chart.js, favicon (locales)
+
 ├── database/
-│   └── schema.sql           # PostgreSQL 3FN + seeds
-├── docker-compose.yml       # PostgreSQL + Backend + Frontend (nginx)
-├── nginx.conf               # Proxy + CORS + /api strip
-└── .env.example
+
+│ └── schema.sql # PostgreSQL 3FN + seeds
+
+├── docker-compose.yml # PostgreSQL + Backend + Frontend (nginx)
+
+├── nginx.conf # Proxy + CORS
+
 ```
 
----
+## Access
 
-## 🔐 Autenticación
+| Service | URL |
 
-- **Login:** `POST /auth/login` con `{email, password}` → retorna JWT
-- **Header:** `Authorization: Bearer <token>`
-- **Roles:** `admin`, `reciclador`, `empresa`
+|---|---|
 
----
+| Frontend | http://localhost:3000 |
 
-## 📋 Endpoints Principales
+| Backend (API) | http://localhost:8000/api |
 
-| Módulo | Prefijo | Qué hace |
-|--------|---------|----------|
-| **Auth** | `/auth` | `POST /login`, `POST /register`, `GET /me` |
-| **Cargas** | `/cargas` | Registrar carga QR, listar, ver |
-| **Certificados** | `/certificados` | Generar PDF, verificar hash público |
-| **Pagos** | `/pagos` | Calcular, listar, marcar pagado |
-| **Dashboard** | `/dashboard` | KPIs, gráficos |
-| **Reportes** | `/reportes` | Excel/PDF cumplimiento |
-| **Usuarios** | `/usuarios` | CRUD + roles |
-| **Catálogos** | `/catalogos` | Zonas, residuos, rutas, camiones, empresas |
+| Docs API (Swagger) | http://localhost:8000/docs |
 
-📖 **Swagger interactivo:** http://localhost:8000/docs
+| Database (PostgreSQL) | localhost:5432 |
 
----
+## Trial users
 
-## 🗄️ Base de Datos (Resumen)
+| Role | Email | Password |
 
-**Tablas:** `zonas`, `empresas`, `rutas`, `camiones`, `residuos`, `usuarios`, `cargas`, `certificados`, `pagos`
+|---|---|---|
 
-**Fórmula de pago:**
-```
-monto = peso_kg × precio_base_kg × mult_calidad × mult_zona
-```
+| Admin | admin@greenloop.co | admin123 |
 
-| Calidad | Multiplicador |
-|---------|---------------|
-| Alta    | 1.20 |
-| Media   | 1.00 |
-| Baja    | 0.70 |
+| Recycler | juan@reciclador.co | rec123 |
 
-| Zona | Multiplicador |
-|------|---------------|
-| Urbana | 1.00 |
-| Rural | 1.20 |
-| Industrial | 1.15 |
-| Centro Comercial | 1.10 |
+| Company | company@test.com | company123 |
 
----
+## Team
 
-## 🐳 Docker Compose (Producción)
+| Member | Role |
 
-```yaml
-# docker-compose.prod.yml (ejemplo)
-services:
-  postgres:
-    image: postgres:16
-    environment:
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    volumes:
-      - pgdata:/var/lib/postgresql/data
+|---|---|
 
-  backend:
-    build: ./Green_Loop/backend
-    environment:
-      DATABASE_URL: postgresql://postgres:${DB_PASSWORD}@postgres:5432/greenloop
-      SECRET_KEY: ${SECRET_KEY}
-      DEBUG: "false"
-    command: gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000
+| Angela García | Scrum Master |
 
-  frontend:
-    image: nginx:alpine
-    ports: ["80:80", "443:443"]
-    volumes:
-      - ./Green_Loop/frontend:/usr/share/nginx/html:ro
-      - ./nginx.prod.conf:/etc/nginx/conf.d/default.conf:ro
-```
+| Sebastian Mendoza | Frontend |
 
----
+| Golden Briana | Backend |
 
-## ✅ Checklist Despliegue
-
-- [ ] `SECRET_KEY` fuerte en `.env`
-- [ ] `DEBUG=False`, `FRONTEND_URL=https://tudominio.com`
-- [ ] PostgreSQL con SSL + backups automáticos
-- [ ] Nginx + SSL (Let's Encrypt) + rate limiting
-- [ ] Gunicorn + Uvicorn workers (4+)
-- [ ] Variables en secrets manager
-- [ ] Logs centralizados (ELK/Loki)
-- [ ] Health checks en `/health`
-
----
-
-## 📦 Dependencias Principales
-
-**Backend:**
-- `fastapi`, `uvicorn`, `sqlalchemy`, `psycopg2`
-- `pydantic[email]`, `python-jose`, `passlib[bcrypt]`
-- `reportlab` (PDF), `openpyxl` (Excel), `qrcode`
-
-**Frontend:**
-- Chart.js (local), Font Awesome (CSS local)
-- Vanilla JS ES6+ (módulos, async/await)
-
----
-
-## 🧪 Testing
-
-```bash
-# Backend
-cd Green_Loop/backend
-pytest tests/ -v --cov=.
-
-# Frontend (configurar Vitest/Jest)
-cd Green_Loop/frontend
-npm test
-```
-
----
-
-## 📄 Licencia
-
-Proyecto educativo/demostrativo - Green Loop Colombia 🇨🇴
-
----
-
-## 🤝 Contribuir
-
-1. Fork → Feature branch → PR
-2. Commits convencionales: `feat:`, `fix:`, `docs:`, `refactor:`
-3. Tests + lint pasan en CI
-
----
-
-**Desarrollado para cumplimiento normativo ambiental en Colombia** ♻️🇨🇴
+| Josué Andrade | Analyst |
