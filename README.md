@@ -1,15 +1,38 @@
+<p align="center">
+  <img src="https://img.shields.io/badge/PostgreSQL-18+-316192?logo=postgresql&logoColor=white" alt="PostgreSQL">
+  <img src="https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white" alt="Docker">
+  <img src="https://img.shields.io/badge/Status-Active-success" alt="Status">
+</p>
+
 # Green Loop — Recycling Platform Database
 
 Database for a recycling platform that connects waste generators with authorized recyclers in the Atlántico region, Colombia.
 
-## Stack
+## Tech Stack
 
 | | |
 | :-- | :-- |
 | **Database** | PostgreSQL 18+ |
-| **Container** | `greenloop` (Docker, group: `local`) |
+| **Container** | `greenloop` (Docker) |
 
-### Docker Connection
+## Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) installed and running
+- PostgreSQL client (`psql`) or any SQL IDE (DBeaver, pgAdmin, etc.)
+
+## Getting Started
+
+### Start the database container
+
+```bash
+docker run -d ^
+  --name greenloop ^
+  -e POSTGRES_PASSWORD=postgres ^
+  -p 5432:5432 ^
+  postgres:18-alpine
+```
+
+### Connection details
 
 | Property   | Value        |
 | :--------- | :----------- |
@@ -18,6 +41,12 @@ Database for a recycling platform that connects waste generators with authorized
 | User       | `postgres`   |
 | Password   | `postgres`   |
 | Database   | `postgres`   |
+
+> ⚠️ Change the password in production via `POSTGRES_PASSWORD`.
+
+### Run the SQL scripts
+
+Follow the [Execution Order](#execution-order) below to initialize all database objects.
 
 ## Database Schema
 
@@ -43,66 +72,84 @@ greenloop/
         └── detalles_certificado
 ```
 
-### Catalogs
+### Entity-Relationship Diagram
 
-| Table | Description |
-| :---- | :---------- |
-| `zonas` | Collection zones with rate multiplier |
-| `usuarios` | System users (admin, recycler, company) |
-| `empresas` | Legal entity registry |
-| `materiales` | Recyclable materials with code, price, and CO₂ factor |
-| `rutas` | Collection routes per zone |
-| `camiones` | Trucks with QR code and capacity |
+```mermaid
+erDiagram
+    zonas ||--o{ rutas : tiene
+    zonas ||--o{ perfil_recicladores : asigna
+    zonas ||--o{ solicitudes_recoleccion : "pertenece a"
 
-### Profiles
+    usuarios ||--o| perfil_recicladores : "es reciclador"
+    usuarios ||--o| perfil_empresas : "es empresa"
+    usuarios ||--o{ solicitudes_recoleccion : "crea (empresa)"
+    usuarios ||--o{ recolecciones : registra
+    usuarios ||--o{ verificacion_documentos : verifica
+    usuarios ||--o{ certificados_ambientales : emite
 
-| Table | Description |
-| :---- | :---------- |
-| `perfil_recicladores` | Recycler-specific data (ID, address, zone, photo) |
-| `perfil_empresas` | Company platform profiles (NIT, legal docs) |
+    rutas ||--o{ camiones : asigna
+    rutas ||--o{ recolecciones : sigue
 
-### Operations
+    solicitudes_recoleccion ||--|{ detalle_solicitud_materiales : contiene
+    solicitudes_recoleccion ||--o| recolecciones : "genera (0..1)"
 
-| Table | Description |
-| :---- | :---------- |
-| `verificacion_documentos` | Document review history by admins |
-| `solicitudes_recoleccion` | Collection requests created by companies |
-| `detalle_solicitud_materiales` | Materials and quantities per request |
-| `recolecciones` | Field collection records (weight, GPS, quality) |
-| `liquidaciones_incentivos` | Recycler payment calculations |
-| `certificados_ambientales` | Environmental certificates with SHA-256 hash |
-| `detalles_certificado` | Collections included in each certificate |
+    materiales ||--o{ detalle_solicitud_materiales : solicitado
+    materiales ||--o{ recolecciones : recolectado
+
+    recolecciones ||--o| liquidaciones_incentivos : "liquida (0..1)"
+    recolecciones ||--o{ detalles_certificado : incluido
+
+    certificados_ambientales ||--|{ detalles_certificado : agrupa
+```
+
+## Constraints & Business Rules
+
+| Rule | Description |
+| :--- | :---------- |
+| **Unique users** | `email` and `documento` must be unique across all users |
+| **Unique materials** | `codigo` and `nombre` are unique |
+| **Unique routes** | `codigo` is unique per route |
+| **Unique vehicles** | `placa` and `qr_code` are unique per truck |
+| **One material per request** | A material can appear only once per collection request |
+| **One-to-one payment** | Each collection has at most one payment record |
+| **Valid date range** | Certificate end date must be >= start date |
+| **Positive weights** | All weight fields must be > 0 |
+| **Valid quality** | Must be `Excelente`, `Aceptable`, or `Contaminado` |
+| **Valid states** | `estado_solicitud`: pendiente, asignada, en_proceso, completada, cancelada |
+| **Cascade deletes** | Deleting a user cascades to profile, requests, and verifications |
 
 ## Project Files
 
 | File | Purpose |
 | :--- | :------ |
-| `Database/01_enums.sql` | ENUM types |
-| `Database/02_tablas.sql` | Tables and indexes |
-| `Database/03_seed_data.sql` | Initial data |
-| `Database/04_funciones.sql` | System functions |
-| `Database/05_vistas.sql` | Views |
-| `Database/06_consultas.sql` | Report queries |
-| `MER-green-loop.pgerd` | Entity-relationship diagram |
+| `Database/enums.sql` | ENUM types |
+| `Database/tablas.sql` | Tables, constraints, and indexes |
+| `Database/seed_data.sql` | Initial seed data |
+| `Database/funciones.sql` | Business logic functions |
+| `Database/vistas.sql` | Views |
+| `Database/consultas.sql` | Report queries |
+| `MER-green-loop.pgerd` | Entity-relationship diagram (pgModeler) |
 
 ## Execution Order
 
+Run each script against the running `greenloop` container in this order:
+
 ```bash
-docker exec -i greenloop psql -U postgres -d postgres -f Database/01_enums.sql
-docker exec -i greenloop psql -U postgres -d postgres -f Database/02_tablas.sql
-docker exec -i greenloop psql -U postgres -d postgres -f Database/03_seed_data.sql
-docker exec -i greenloop psql -U postgres -d postgres -f Database/04_funciones.sql
-docker exec -i greenloop psql -U postgres -d postgres -f Database/05_vistas.sql
+docker exec -i greenloop psql -U postgres -d postgres -f Database/enums.sql
+docker exec -i greenloop psql -U postgres -d postgres -f Database/tablas.sql
+docker exec -i greenloop psql -U postgres -d postgres -f Database/seed_data.sql
+docker exec -i greenloop psql -U postgres -d postgres -f Database/funciones.sql
+docker exec -i greenloop psql -U postgres -d postgres -f Database/vistas.sql
 ```
 
-`06_consultas.sql` is optional (SELECT-only reports).
+`consultas.sql` is optional (SELECT-only report queries).
 
 ## Conventions
 
-- Explicit `public` schema on all tables
-- Idempotency with `CREATE TABLE IF NOT EXISTS` and `CREATE INDEX IF NOT EXISTS`
+- Explicit `public` schema on all objects
+- Idempotent scripts: `CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`
 - `TIMESTAMP` without time zone
-- ENUMs created with direct `CREATE TYPE`
+- ENUMs created via `CREATE TYPE`
 - Seed data guarded with `WHERE NOT EXISTS`
 
 ## Main Functions
@@ -120,3 +167,11 @@ docker exec -i greenloop psql -U postgres -d postgres -f Database/05_vistas.sql
 | `registrar_recoleccion` | Record collection and auto-calculate payment |
 | `liquidar_recoleccion` | Calculate rate + quality bonus |
 | `generar_certificado` | Generate environmental certificate with SHA-256 hash |
+
+## Contributing
+
+Internal project. Create a feature branch from `database` and open a pull request with your changes.
+
+## License
+
+All rights reserved — Green Loop project.
